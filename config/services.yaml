@@ -20,5 +20,14 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    app.normalizer.object_normalizer:
+      class: Symfony\Component\Serializer\Normalizer\ObjectNormalizer
+      tags: ['serializer.normalizer']
+      arguments: 
+        $defaultContext:
+          callbacks: {
+            'createdAt': '@App\Serializer\DateTimeCallback'
+          }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

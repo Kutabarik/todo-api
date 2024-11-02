@@ -17,5 +17,6 @@ services:
         volumes:
             - .docker/mysql:/var/lib/mysql
         environment:
+            MYSQL_DATABASE: todo
             MYSQL_ROOT_PASSWORD: secret
 
