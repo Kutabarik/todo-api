@@ -20,7 +20,7 @@ Follow these steps to install and set up the project:
 3. Enter the `php` container:
 
    ```bash
-   docker exec -it php sh
+   docker exec -it todo-api-php-1 bash
    ```
 
 4. Install Composer dependencies:
