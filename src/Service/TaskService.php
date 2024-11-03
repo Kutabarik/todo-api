@@ -28,6 +28,16 @@ class TaskService
         return $task;
     }
 
+    public function getTaskById(int $id): Task
+    {
+        $task = $this->taskRepository->find($id);
+        if (!$task) {
+            throw new \InvalidArgumentException("Task not found");
+        }
+
+        return $task;
+    }
+
     public function updateTask(Task $task, array $data): Task
     {
         $task->setTitle($data['title'] ?? $task->getTitle());

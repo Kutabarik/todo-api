@@ -47,12 +47,12 @@ class TaskController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'], format: 'json')]
     public function show(int $id): JsonResponse
     {
-        $task = $this->taskRepository->find($id);
-        if (!$task) {
-            return $this->json(['error' => 'Task not found'], 404);
+        try {
+            $task = $this->taskService->getTaskById($id);
+            return $this->json($task);
+        } catch (\InvalidArgumentException $e) {
+            return $this->json(['error' => $e->getMessage()], 404);
         }
-
-        return $this->json($task);
     }
 
     #[Route('/{id}', name: 'update', methods: ['PATCH'], format: 'json')]
@@ -76,24 +76,24 @@ class TaskController extends AbstractController
     #[Route('/{id}/complete', name: 'complete', methods: ['PATCH'], format: 'json')]
     public function markAsCompleted(int $id): JsonResponse
     {
-        $task = $this->taskRepository->find($id);
-        if (!$task) {
-            return $this->json(['error' => 'Task not found'], 404);
+        try {
+            $task = $this->taskService->getTaskById($id);
+            $updatedTask = $this->taskService->markAsCompleted($task);
+            return $this->json($updatedTask);
+        } catch (\InvalidArgumentException $e) {
+            return $this->json(['error' => $e->getMessage()], 404);
         }
-
-        $updatedTask = $this->taskService->markAsCompleted($task);
-        return $this->json($updatedTask);
     }
 
     #[Route('/{id}', name: 'delete', methods: ['DELETE'], format: 'json')]
     public function delete(int $id): JsonResponse
     {
-        $task = $this->taskRepository->find($id);
-        if (!$task) {
-            return $this->json(['error' => 'Task not found'], 404);
+        try {
+            $task = $this->taskService->getTaskById($id);
+            $this->taskService->deleteTask($task);
+            return $this->json(['status' => 'Task deleted'], 204);
+        } catch (\InvalidArgumentException $e) {
+            return $this->json(['error' => $e->getMessage()], 404);
         }
-
-        $this->taskService->deleteTask($task);
-        return $this->json(['status' => 'Task deleted'], 204);
     }
 }
