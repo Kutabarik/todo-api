@@ -11,7 +11,11 @@ class TaskService
     public function __construct(
         private EntityManagerInterface $em,
         private TaskRepository $taskRepository,
-    ) {
+    ) {}
+
+    public function findByFilters(array $filters): array
+    {
+        return $this->taskRepository->findByFilters($filters);
     }
 
     public function createTask(array $data): Task

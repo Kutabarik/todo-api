@@ -2,21 +2,19 @@
 
 namespace App\Controller;
 
-use App\Repository\TaskRepository;
 use App\Service\TaskService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/tasks', name: 'api_tasks_')]
 class TaskController extends AbstractController
 {
     public function __construct(
-        private TaskRepository $taskRepository,
         private TaskService $taskService
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'list', methods: ['GET'], format: 'json')]
     public function index(Request $request): JsonResponse
@@ -26,9 +24,9 @@ class TaskController extends AbstractController
             'priority' => $request->query->get('priority'),
         ];
 
-        $tasks = $this->taskRepository->findByFilters($filters);
+        $tasks = $this->taskService->findByFilters($filters);
 
-        return $this->json($tasks, 200);
+        return $this->json($tasks, Response::HTTP_OK);
     }
 
     #[Route('', name: 'create', methods: ['POST'], format: 'json')]
@@ -38,9 +36,9 @@ class TaskController extends AbstractController
 
         try {
             $task = $this->taskService->createTask($data);
-            return $this->json($task, 201);
+            return $this->json($task, Response::HTTP_CREATED);
         } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -51,7 +49,7 @@ class TaskController extends AbstractController
             $task = $this->taskService->getTaskById($id);
             return $this->json($task);
         } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 404);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -59,17 +57,13 @@ class TaskController extends AbstractController
     public function update(Request $request, int $id): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $task = $this->taskRepository->find($id);
-
-        if (!$task) {
-            return $this->json(['error' => 'Task not found'], 404);
-        }
 
         try {
+            $task = $this->taskService->getTaskById($id);
             $updatedTask = $this->taskService->updateTask($task, $data);
             return $this->json($updatedTask);
         } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 400);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -81,7 +75,7 @@ class TaskController extends AbstractController
             $updatedTask = $this->taskService->markAsCompleted($task);
             return $this->json($updatedTask);
         } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 404);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -91,9 +85,9 @@ class TaskController extends AbstractController
         try {
             $task = $this->taskService->getTaskById($id);
             $this->taskService->deleteTask($task);
-            return $this->json(['status' => 'Task deleted'], 204);
+            return $this->json(['status' => 'Task deleted'], Response::HTTP_NO_CONTENT);
         } catch (\InvalidArgumentException $e) {
-            return $this->json(['error' => $e->getMessage()], 404);
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
 }
